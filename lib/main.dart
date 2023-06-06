@@ -1,9 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map_arcgis/flutter_map_arcgis.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_login/flutter_login.dart';
+import 'package:flutter_login/theme.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
+
+import 'package:pariwisata_wonogiri/dashboard.dart';
 
 void main() => runApp(MyApp());
+const users = {
+  'dribbble@gmail.com': '12345',
+  'hunter@gmail.com': 'hunter',
+};
+Duration get loginTime => Duration(milliseconds: 2250);
+
+  Future<String?> _authUser(LoginData data) async {
+    // const url =  "http://127.0.0.1:8000/api/login";
+    // var response = await http.post()
+    var url = Uri.http('10.0.2.2:8000', 'api/login');
+    var response = await http.post(url, body: {
+        'email': data.name,
+        'password': data.password
+     });
+    var jsonResponse = convert.jsonDecode(response.body) as Map <String, dynamic>;
+    return Future.delayed(loginTime).then((_) {
+      if (jsonResponse['status'] == "400") {
+        return jsonResponse['messages'];
+      }
+      // if (users[data.name] != data.password) {
+      //   return 'Password does not match';
+      // }
+      return null;
+    });
+  }
+  Future<String> _recoverPassword(String name) {
+    debugPrint('Name: $name');
+    return Future.delayed(loginTime).then((_) {
+      if (!users.containsKey(name)) {
+        return 'User not exists';
+      } 
+      return "Something error";
+    });
+  }
 
 class MyApp extends StatefulWidget {
   @override
@@ -19,80 +56,24 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.green
+      ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('SIG Pariwisata Wonogiri')),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Flexible(
-                child: FlutterMap(
-                  options: MapOptions(
-                    // center: LatLng(32.91081899999999, -92.734876),
-                    center: LatLng(35.611909, -82.440682),
-                    zoom: 14.0,
-                    plugins: [EsriPlugin()],
-
-                  ),
-                  layers: [
-                    TileLayerOptions(
-                      urlTemplate:
-                      'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    ),
-                    // FeatureLayerOptions("https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Congressional_Districts/FeatureServer/0",
-                    //   "polygon",
-                    //   onTap: (dynamic attributes, LatLng location) {
-                    //     print(attributes);
-                    //   },
-                    //   render: (dynamic attributes){
-                    //     // You can render by attribute
-                    //     return PolygonOptions(
-                    //         borderColor: Colors.blueAccent,
-                    //         color: Colors.black12,
-                    //         borderStrokeWidth: 2
-                    //     );
-                    //   },
-                    //
-                    // ),
-                    FeatureLayerOptions(
-                      "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
-                      "point",
-                      render:(dynamic attributes){
-                        // You can render by attribute
-                        return const PointOptions(
-                          width: 30.0,
-                          height: 30.0,
-                          builder: Icon(Icons.pin_drop),
-                        );
-                      },
-                      onTap: (attributes, LatLng location) {
-                        print(attributes);
-                      },
-                    ),
-                    // FeatureLayerOptions(
-                    //   "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Denver_Streets_Centerline/FeatureServer/0",
-                    //   "polyline",
-                    //   render:(dynamic attributes){
-                    //     // You can render by attribute
-                    //     return PolygonLineOptions(
-                    //         borderColor: Colors.red,
-                    //         color: Colors.red,
-                    //         borderStrokeWidth: 2
-                    //     );
-                    //   },
-                    //   onTap: (attributes, LatLng location) {
-                    //     print(attributes);
-                    //   },
-                    // ),
-
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        body: FlutterLogin(
+      titleTag: "Login Pengunjung",
+      logo: const AssetImage('assets/login_logo.png'),
+      onLogin: _authUser,
+      onSubmitAnimationCompleted: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(title:''),));
+        // Navigator.of(context).pushReplacement(MaterialPageRoute(
+        //   builder: (context) => Dashboard(),
+        // ));
+      },
+      onRecoverPassword: _recoverPassword,
+    )
       ),
     );
   }
