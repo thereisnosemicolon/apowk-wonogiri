@@ -38,6 +38,10 @@ dependencies:
   flutter_map_arcgis: ^2.0.4
   flutter_map: ^2.2.0
   latlong2: ^0.8.2
+  flutter_login: ^4.1.1
+  http: ^0.13.6
+  anim_search_bar: ^2.0.3
+  paginated_search_bar: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -62,8 +66,11 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/login_logo.png
+    - assets/dashboard_logo.png
+    - assets/dashboard_text.png
+    - assets/image_example.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -77,10 +84,11 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
