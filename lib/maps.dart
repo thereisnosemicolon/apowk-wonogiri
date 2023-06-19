@@ -26,8 +26,8 @@ class _MapsState extends State<Maps> {
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
   String latitude = "";
   String longitude = "";
-  LatLng startLocation = const LatLng(-7.837485711182153, 110.89955274010913);  
-  LatLng endLocation = const LatLng(-7.854320361584187, 110.9104510598748);         
+  LatLng startLocation = const LatLng(0.0, 0.0);  
+  LatLng endLocation = const LatLng(0.0, 0.0);         
 
   @override
   void initState() {
