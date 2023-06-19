@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'package:flutter_login/theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
@@ -56,24 +55,24 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.green
       ),
       home: Scaffold(
-        body: FlutterLogin(
-      titleTag: "Login Pengunjung",
-      logo: const AssetImage('assets/login_logo.png'),
-      onLogin: _authUser,
-      onSubmitAnimationCompleted: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(title:''),));
-        // Navigator.of(context).pushReplacement(MaterialPageRoute(
-        //   builder: (context) => Dashboard(),
-        // ));
-      },
+        body: Builder(builder: (context) => FlutterLogin(
+        titleTag: "Login Pengunjung",
+        logo: const AssetImage('assets/login_logo.png'),
+        onLogin: _authUser,
+        onSubmitAnimationCompleted: () {
+        //  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> Dashboard(title: '')), (route) => false);
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => Dashboard(title: ''),
+          ));
+        },
       onRecoverPassword: _recoverPassword,
-    )
+      ),
+      )
       ),
     );
   }
