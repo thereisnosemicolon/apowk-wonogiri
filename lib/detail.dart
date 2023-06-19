@@ -1,12 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:paginated_search_bar/paginated_search_bar.dart';
-import 'package:endless/endless.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:pariwisata_wonogiri/dashboard.dart';
+import 'package:pariwisata_wonogiri/maps.dart';
 
 Duration get loadTime => const Duration(milliseconds: 2250);
 
@@ -33,9 +31,17 @@ class Destination{
     );
   }
 
-}
+} 
 
-
+Future listData(int id) async {
+    debugPrint("id : $id");
+    var url = Uri.http('10.0.2.2:8000', 'api/list_tempat/$id');
+    var response = await http.get(url);
+    var list = json.decode(response.body)['messages'].map((data) => Destination.fromJson(data)).toList();
+    return Future.delayed(loadTime).then((_) {
+      return list;
+    });
+  }
 
 
 
@@ -52,35 +58,7 @@ class Detail extends StatefulWidget {
 
 
 class _DetailState extends State<Detail> {
-  final int id = 0;
-  List _data = [];  
-
   @override
-  void initState() {
-        // ignore: todo
-        // TODO: implement initState
-        super.initState();
-        _getData(id);
-  }
-
-  Future _getData(int id) async {
-    debugPrint("this is id: $id");
-    var url = Uri.http('10.0.2.2:8000', 'api/list_tempat/$id');
-    var response = await http.get(url);
-    final list = json.decode(response.body)['messages'];
-    debugPrint("this is response : " + list);
-    setState(() {
-      //memasukan data yang di dapat dari internet ke variabel _get
-      _data = list;
-    });
-
-    debugPrint("_data is : $_data");
-
-    // return Future.delayed(loadTime).then((_) {
-    //   return _data;
-    // });
-  }
-
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
@@ -106,13 +84,15 @@ class _DetailState extends State<Detail> {
           child: Container(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
             width: 360,
-            child: ListView.builder(
+            child: FutureBuilder(
+              future: listData(widget.id),
+              builder: (BuildContext context, AsyncSnapshot snapshot){
+              return  ListView.builder(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemCount: 1,
                 itemBuilder: (BuildContext context, int index){
-                  debugPrint("test : " + _data[index]['id']);
-                  if (_data.isNotEmpty){
+                  if (snapshot.hasData){
                     return Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
@@ -133,64 +113,88 @@ class _DetailState extends State<Detail> {
                                     Padding(
                                       padding: const EdgeInsets.only(left: 10, top: 10), 
                                       child: Text(
-                                        _data[index]['nama_destinasi'],
+                                        snapshot.data[index].namaDestinasi,
                                         style: const TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 24,
                                           fontWeight: FontWeight.w600
                                         ),
                                       )
                                     ),
-                                   Padding(padding: const EdgeInsets.only(top: 10, right: 10), 
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          debugPrint("Peler kontol memek");
-                                        },
-                                        child: const Text(
-                                          "Menuju Lokasi",
-                                          style:  TextStyle(
-                                            decoration: TextDecoration.underline,
-                                            color: Colors.blueGrey,
-                                            fontWeight: FontWeight.w300,
-                                            fontSize: 8
-                                          ),
-                                        ),
-                                      )
-                                    )
                                 ],
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                     Padding(
-                                      padding: const EdgeInsets.only(left: 10, bottom:10), 
+                                      padding: const EdgeInsets.only(left: 12, bottom:10, top:5), 
                                       child: Text(
-                                        _data[index]['lokasi'],
+                                        snapshot.data[index].lokasi,
                                         style:  const TextStyle(
                                           color: Colors.blueGrey,
                                           fontWeight: FontWeight.w400,
-                                          fontSize: 8
+                                          fontSize: 11
                                         ),
                                       )
                                     ),
-                                    const Padding(
-                                      padding:  EdgeInsets.only(top: 10, bottom:10, right: 10), 
-                                      child: Text(
-                                        "DetailDestinasi",
-                                        style:  TextStyle(
-                                          decoration: TextDecoration.underline,
-                                          color: Colors.blueGrey,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 8
-                                        ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 12, bottom:10, top:5), 
+                                      child:  ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                          minWidth: 300.0,
+                                          maxWidth: 300.0,
+                                          minHeight: 30.0,
+                                          maxHeight: 100.0,
+                                        ), 
+                                          child: AutoSizeText(
+                                            snapshot.data[index].deskripsi,
+                                            style:  const TextStyle(
+                                            color: Colors.blueGrey,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 11
+                                          ),
                                       )
-                                    )
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 12, bottom:10, top:5), 
+                                      child: TextButton.icon(
+                                        style: const ButtonStyle(
+                                          backgroundColor: MaterialStatePropertyAll(Color(0xff68B569))
+                                        ),
+                                        onPressed: () { Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> Maps(latitude: snapshot.data[index].latitude, longitude: snapshot.data[index].longitude )), (route) => false); }, 
+                                        label: const Text(
+                                          "Menuju Lokasi",
+                                          style:  TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 11
+                                          ),
+                                        ),
+                                        icon:  const Icon(
+                                          Icons.location_on_outlined,
+                                          color: Colors.white,
+                                        ), 
+                                      )
+                                    ),
                                 ],
                               ),
                         ],)
                     );
                   }
                 }
-              )
+                );
+              }
+            )
           )
         ),
       )

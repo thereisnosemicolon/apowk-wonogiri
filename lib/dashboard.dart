@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:pariwisata_wonogiri/detail.dart';
+import 'package:pariwisata_wonogiri/maps.dart';
 
 Duration get loadTime => const Duration(milliseconds: 2250);
 
@@ -39,6 +40,7 @@ Future listData() async {
     var url = Uri.http('10.0.2.2:8000', 'api/list_tempat');
     var response = await http.get(url);
     var list = json.decode(response.body)['messages'].map((data) => Destination.fromJson(data)).toList();
+    // debugPrint("aa : $list");
     return Future.delayed(loadTime).then((_) {
       return list;
     });
@@ -226,7 +228,7 @@ class _DashboardState extends State<Dashboard> {
                                    Padding(padding: const EdgeInsets.only(top: 10, right: 10), 
                                       child: GestureDetector(
                                         onTap: () {
-                                          debugPrint("kontol memek");
+                                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> Maps(latitude: snapshot.data[index].latitude, longitude: snapshot.data[index].longitude )), (route) => false);
                                         },
                                         child: const Text(
                                           "Menuju Lokasi",
@@ -256,7 +258,7 @@ class _DashboardState extends State<Dashboard> {
                                       )
                                     ),
                                     Padding(
-                                      padding:  EdgeInsets.only(top: 10, bottom:10, right: 10), 
+                                      padding:  const EdgeInsets.only(top: 10, bottom:10, right: 10), 
                                       child: GestureDetector(
                                         onTap: () {
                                           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> Detail(id: snapshot.data[index].id,)), (route) => false);
